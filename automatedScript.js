@@ -43,12 +43,12 @@ function exportToCsv(filename, rows) {
 
 async function fetchTheDOM(url) {
   return fetch(url)
-    .then(e => e.blob(),console.error)
-    .then(e => e.text(),console.error)
+    .then(e => e.blob())
+    .then(e => e.text())
     .then((f) => {
       var parser = new DOMParser();
       return parser.parseFromString(f, 'text/html');
-    },console.error).catch(console.error)
+    })
 }
 
 function grabData(document) {
@@ -160,17 +160,15 @@ function grabData(document) {
 
 fetchTheDOM("https://www.intel.com/content/www/us/en/products/processors/core/i5-processors.html")
   .then(document => {
-  	console.log("fetched main url")
-    var processorLinks = Array.from(document.querySelectorAll(".prodNameTitle.prodNameList")).map(e => e.parentElement.href)
+  	console.log("fetched main url");
+    var processorLinks = Array.from(document.querySelectorAll(".productTitleHref.blade-item-link")).map(e => e.href)
 	
-  	console.log(`Got ${processorLinks.length} links for processors`);
-  
   	var linksQueued = 0;
     var promises = [];
     var allCSV = [];
 
     for (var link of processorLinks) {
-    	console.log(linksQueued+" links queued")
+    	console.log((++linksQueued)+" links queued")
       promises.push(fetchTheDOM(link))
     }
 
@@ -178,6 +176,7 @@ fetchTheDOM("https://www.intel.com/content/www/us/en/products/processors/core/i5
       .then(documents => {
       	console.log("Done fetching all links")
         for (var doc of documents) {
+        	console.log(`Grabbing ${doc.URL}`)
           if (allCSV.length < 2) {
             var data = grabData(doc);
             allCSV.push(data[0]);
